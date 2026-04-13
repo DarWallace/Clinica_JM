@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rooms', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('type'); // individual, group, mixed
-            $table->integer('capacity');
-            $table->timestamps(); // Esto genera created_at y updated_at
+        Schema::table('services', function (Blueprint $table) {
+            // Añadimos la relación con especialistas
+            $table->foreignId('specialist_id')->after('id')->constrained('specialists', 'user_id'); //
         });
     }
 
@@ -25,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rooms');
+        Schema::table('services', function (Blueprint $table) {
+            //
+        });
     }
 };

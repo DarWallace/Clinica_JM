@@ -11,11 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rooms', function (Blueprint $table) {
+        Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('type'); // individual, group, mixed
-            $table->integer('capacity');
+            $table->text('description');
+            $table->integer('duration'); // minutes
+            $table->integer('buffer_minutes');
+            $table->decimal('price', 6, 2); // 6 dígitos en total, 2 decimales, creo que será suficiente
+            $table->string('type'); // individual, group
+            $table->integer('max_patients');
+            $table->boolean('active');
             $table->timestamps(); // Esto genera created_at y updated_at
         });
     }
@@ -25,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rooms');
+        Schema::dropIfExists('services');
     }
 };

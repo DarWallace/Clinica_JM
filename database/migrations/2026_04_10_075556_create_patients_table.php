@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rooms', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('type'); // individual, group, mixed
-            $table->integer('capacity');
-            $table->timestamps(); // Esto genera created_at y updated_at
+        Schema::create('patients', function (Blueprint $table) {
+            $table->foreignId('user_id')->primary()->constrained('users')->onDelete('cascade');
+            $table->date('born_date');
+            $table->text('medical_history');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rooms');
+        Schema::dropIfExists('patients');
     }
 };
