@@ -13,19 +13,20 @@ class CreateScheduleRule extends CreateRecord
     // Sobreescribimos el método de creación
     protected function handleRecordCreation(array $data): Model
     {
-        $days = $data['day_of_week']; // Aquí tenemos el array [1, 3, 5...]
+        // 1. Extraemos los días (que ahora vienen como [2, 3, 4] por el CheckboxList/Multiple)
+        $days = $data['day_of_week'];
         $lastRecord = null;
 
+        // 2. Recorremos cada día y creamos un registro independiente
         foreach ($days as $day) {
-            // Creamos una copia de los datos pero con un solo día
             $singleDayData = $data;
-            $singleDayData['day_of_week'] = $day;
+            $singleDayData['day_of_week'] = $day; // Asignamos el día actual del bucle
 
-            // Guardamos el registro en la base de datos
+            // Guardamos en la tabla
             $lastRecord = static::getModel()::create($singleDayData);
         }
 
-        // Devolvemos el último para que Filament no explote
+        // 3. Devolvemos el último para que Filament no se quede colgado
         return $lastRecord;
     }
     protected function getRedirectUrl(): string
