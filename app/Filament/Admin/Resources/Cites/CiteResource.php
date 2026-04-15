@@ -44,9 +44,9 @@ class CiteResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCites::route('/'),
-            'create' => Pages\CreateCite::route('/create'),
-            'edit' => Pages\EditCite::route('/{record}/edit'),
+            'index' => ListCites::route('/'),
+            'create' => CreateCite::route('/create'),
+            'edit' => EditCite::route('/{record}/edit'),
         ];
     }
 }
