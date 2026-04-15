@@ -20,4 +20,9 @@ class Patient extends Model
         // Relacionamos el user_id del paciente con el id del usuario
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+//     public function cites(): HasMany
+// {
+
+//     return $this->hasMany(Cite::class);
+// }
 }

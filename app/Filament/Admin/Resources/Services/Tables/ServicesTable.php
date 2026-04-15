@@ -15,35 +15,32 @@ class ServicesTable
     {
         return $table
             ->columns([
-                TextColumn::make('specialist_id')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('duration')
-                    ->numeric()
+                    ->label('Servicio')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('buffer_minutes')
-                    ->numeric()
+
+                TextColumn::make('specialist.user.name')
+                    ->label('Especialista')
                     ->sortable(),
+
                 TextColumn::make('price')
-                    ->money()
+                    ->label('Precio')
+                    ->money('eur')
                     ->sortable(),
+
+                TextColumn::make('duration')
+                    ->label('Duración')
+                    ->suffix(' min'),
+
                 TextColumn::make('type')
-                    ->searchable(),
-                TextColumn::make('max_patients')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Tipo')
+                    ->badge()
+                    ->color(fn (string $state): string => $state === 'individual' ? 'gray' : 'info'),
+
                 IconColumn::make('active')
+                    ->label('Activo')
                     ->boolean(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

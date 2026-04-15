@@ -15,19 +15,31 @@ class RoomsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('type')
-                    ->searchable(),
-                TextColumn::make('capacity')
-                    ->numeric()
+                    ->label('Nombre de la Sala')
+                    ->searchable()
                     ->sortable(),
+
+                TextColumn::make('type')
+                    ->label('Tipo')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'individual' => 'info',
+                        'group' => 'success',
+                        'mixed' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+
+                TextColumn::make('capacity')
+                    ->label('Capacidad')
+                    ->numeric()
+                    ->alignCenter()
+                    ->sortable()
+                    ->suffix(' pax'),
+
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
+                    ->label('Creada el')
+                    ->dateTime('d/m/Y H:i')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

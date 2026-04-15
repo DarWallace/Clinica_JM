@@ -18,7 +18,17 @@ class PatientResource extends Resource
 {
     protected static ?string $model = Patient::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    // Para asegurarnos de que el recurso aparezca en el menú de navegación
+    //protected static ?int $navigationSort = 1;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
+
+    // Etiqueta clara para el menú
+    protected static ?string $navigationLabel = 'Pacientes';
+
+    // Opcional: Etiquetas de modelo
+    protected static ?string $pluralModelLabel = 'Pacientes';
+    protected static ?string $modelLabel = 'Paciente';
 
     protected static ?string $recordTitleAttribute = 'name';
 

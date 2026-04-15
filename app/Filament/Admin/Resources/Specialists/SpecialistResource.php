@@ -19,7 +19,12 @@ class SpecialistResource extends Resource
 {
     protected static ?string $model = Specialist::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?string $navigationLabel = 'Especialistas';
+
+    protected static ?string $pluralModelLabel = 'Especialistas';
+    protected static ?string $modelLabel = 'Especialista';
 
     // Cambiado para que apunte a la relación
     protected static ?string $recordTitleAttribute = 'name';

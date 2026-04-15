@@ -27,16 +27,20 @@ class SpecialistForm
                             ->label('Email')
                             ->email()
                             ->required()
-                            ->unique('users', 'email', ignoreRecord: true),
+                            ->unique(
+                                table: 'users', // Fuerza a que busque en la tabla users
+                                column: 'email',
+                                ignorable: fn($record) => $record?->user // Ignora al usuario asociado a este especialista
+                            ),
                         TextInput::make('user.phone')
                             ->label('Teléfono'),
 
                         TextInput::make('user.password')
-                            ->label(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord ? 'Contraseña' : 'Nueva Contraseña')
+                            ->label(fn($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord ? 'Contraseña' : 'Nueva Contraseña')
                             ->password()
-                            ->dehydrated(fn ($state) => filled($state))
+                            ->dehydrated(fn($state) => filled($state))
                             // Quitamos el required para que no salte el error HTML5
-                            ->helperText(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord
+                            ->helperText(fn($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord
                                 ? 'Autogenerada: Nombre + 3 números del móvil.'
                                 : 'Deje vacío para mantener la actual.'),
 

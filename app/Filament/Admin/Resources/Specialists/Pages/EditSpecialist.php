@@ -53,4 +53,8 @@ class EditSpecialist extends EditRecord
 
         return $record;
     }
+    protected function getRedirectUrl(): string
+{
+    return $this->getResource()::getUrl('index');
+}
 }

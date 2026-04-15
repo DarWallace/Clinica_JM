@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('schedule_rules', function (Blueprint $table) {
+            //
         });
+        Schema::table('schedule_rules', function (Blueprint $table) {
+        $table->date('valid_until')->nullable()->change();
+    });
     }
 
     /**
@@ -22,6 +24,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sessions');
+        Schema::table('schedule_rules', function (Blueprint $table) {
+            //
+        });
     }
+
 };
