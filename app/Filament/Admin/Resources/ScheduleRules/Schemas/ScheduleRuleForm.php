@@ -51,8 +51,8 @@ class ScheduleRuleForm
 
                                     ->columns(2)
                                     ->required()
-                                    ->extraAttributes(['class' => 'bg-gray-50/50 p-4 rounded-xl border border-gray-100']),
-
+                                    ->extraAttributes(['class' => 'bg-gray-50/50 p-4 rounded-xl border border-gray-100'])
+                                    ->formatStateUsing(fn ($state) => filled($state) ? [(string) $state] : []),
 
                                 // Selección de horas con validación v5
                                 Grid::make(1)

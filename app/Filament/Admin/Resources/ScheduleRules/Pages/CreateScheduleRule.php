@@ -5,30 +5,34 @@ namespace App\Filament\Admin\Resources\ScheduleRules\Pages;
 use App\Filament\Admin\Resources\ScheduleRules\ScheduleRuleResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Artisan;
 
 class CreateScheduleRule extends CreateRecord
 {
     protected static string $resource = ScheduleRuleResource::class;
 
-    // Sobreescribimos el método de creación
     protected function handleRecordCreation(array $data): Model
     {
-        // 1. Extraemos los días (que ahora vienen como [2, 3, 4] por el CheckboxList/Multiple)
-        $days = $data['day_of_week'];
+        $days = is_array($data['day_of_week'])
+            ? $data['day_of_week']
+            : [$data['day_of_week']];
+
         $lastRecord = null;
 
-        // 2. Recorremos cada día y creamos un registro independiente
         foreach ($days as $day) {
             $singleDayData = $data;
-            $singleDayData['day_of_week'] = $day; // Asignamos el día actual del bucle
+            $singleDayData['day_of_week'] = (int) $day;
 
-            // Guardamos en la tabla
             $lastRecord = static::getModel()::create($singleDayData);
         }
 
-        // 3. Devolvemos el último para que Filament no se quede colgado
+        Artisan::call('cites:generate', [
+            'days' => 14,
+        ]);
+
         return $lastRecord;
     }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

@@ -16,4 +16,15 @@ class EditCite extends EditRecord
             DeleteAction::make(),
         ];
     }
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    // Opcional: Si quieres que el mensaje de "Guardado" sea personalizado
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'Cita reservada correctamente';
+    }
+
 }

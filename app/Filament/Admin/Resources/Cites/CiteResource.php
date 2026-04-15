@@ -45,7 +45,7 @@ class CiteResource extends Resource
     {
         return [
             'index' => ListCites::route('/'),
-            'create' => CreateCite::route('/create'),
+            //'create' => CreateCite::route('/create'),
             'edit' => EditCite::route('/{record}/edit'),
         ];
     }

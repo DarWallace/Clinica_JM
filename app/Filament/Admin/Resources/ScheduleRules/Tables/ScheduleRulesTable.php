@@ -27,7 +27,7 @@ class ScheduleRulesTable
                         3 => 'Miércoles',
                         4 => 'Jueves',
                         5 => 'Viernes',
-                        6 => 'Sábado',
+                        //6 => 'Sábado',
                        // 7 => 'Domingo',
                         default => 'Desconocido',
                     })

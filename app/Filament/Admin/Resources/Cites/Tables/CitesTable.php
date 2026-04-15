@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources\Cites\Tables;
 use Carbon\Carbon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
@@ -68,6 +69,7 @@ class CitesTable
                         return 'Fecha: ' . Carbon::parse($data['date'])->format('d/m/Y');
                     }),
 
+
                 SelectFilter::make('status')
                     ->options([
                         'available' => 'Solo libres',
@@ -80,6 +82,14 @@ class CitesTable
                     ->preload(),
 
             ])
+            ->filtersTriggerAction(
+                fn (Action $action) => $action
+                    ->button()
+                    ->label('Filtrar Citas')
+                    ->icon('heroicon-m-funnel')
+                    ->size('lg')
+                    ->color('primary'),
+            )
             ->recordActions([
                 EditAction::make(),
             ])
