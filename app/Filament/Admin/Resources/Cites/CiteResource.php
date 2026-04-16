@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Cites;
 
 use App\Filament\Admin\Resources\Cites\Pages\CreateCite;
+use App\Filament\Admin\Resources\Cites\Pages\CitesAvailability;
 use App\Filament\Admin\Resources\Cites\Pages\EditCite;
 use App\Filament\Admin\Resources\Cites\Pages\ListCites;
 use App\Filament\Admin\Resources\Cites\Schemas\CiteForm;
@@ -13,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+
 
 class CiteResource extends Resource
 {
@@ -46,6 +48,7 @@ class CiteResource extends Resource
         return [
             'index' => ListCites::route('/'),
             //'create' => CreateCite::route('/create'),
+            'availability' => CitesAvailability::route('/availability'),
             'edit' => EditCite::route('/{record}/edit'),
         ];
     }

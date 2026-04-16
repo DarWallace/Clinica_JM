@@ -27,7 +27,7 @@ class CreateScheduleRule extends CreateRecord
         }
 
         Artisan::call('cites:generate', [
-            'days' => 14,
+            'days' => 30,
         ]);
 
         return $lastRecord;
