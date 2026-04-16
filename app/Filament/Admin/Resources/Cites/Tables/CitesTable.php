@@ -91,7 +91,7 @@ class CitesTable
                     ->color('primary'),
             )
             ->recordActions([
-                EditAction::make(),
+                //EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -17,31 +17,15 @@ class ListCites extends ListRecords
     {
         return [
             Action::make('availability')
-                ->label('Disponibilidad')
+                ->label('Nueva cita')
                 ->icon('heroicon-o-calendar-days')
                 ->url(CiteResource::getUrl('availability'))
-                ->color('gray'),
-            Action::make('generateNextMonth')
-                ->label('Generar próximo mes')
-                ->color('info')
-                ->icon('heroicon-m-calendar-days')
-                ->requiresConfirmation() // Opcional: pide confirmar para evitar clicks accidentales
-                ->modalHeading('Generar citas')
-                ->modalDescription('¿Estás seguro de que quieres generar las citas para los próximos 30 días?')
-                ->action(function () {
-                    // Ejecutamos el comando
-                    Artisan::call('cites:generate', [
-                        'days' => 30,
-                    ]);
-
-                    // Enviamos una notificación de éxito al usuario
-                    Notification::make()
-                        ->title('Citas generadas correctamente')
-                        ->success()
-                        ->send();
-                }),
-
-            // CreateAction::make(),
+                ->color('primary')
+                ->size('lg')
+                ->button()
+                ->extraAttributes([
+                    'class' => 'font-semibold shadow-sm',
+                ]),
         ];
     }
 }
