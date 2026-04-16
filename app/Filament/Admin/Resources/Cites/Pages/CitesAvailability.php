@@ -8,7 +8,6 @@ use App\Services\Cites\BuildVirtualCiteSlotsService;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\Page;
-use Illuminate\Support\Collection;
 
 class CitesAvailability extends Page
 {
@@ -22,22 +21,31 @@ class CitesAvailability extends Page
     public ?string $until_date = null;
     public $service_id = null;
 
+    public array $availableSlots = [];
+
     public function mount(): void
     {
         $this->from_date = now()->toDateString();
         $this->until_date = now()->copy()->addDays(7)->toDateString();
+
+        $this->refreshSlots();
     }
 
-    public function getSlotsProperty(): Collection
+    public function updated($property): void
     {
-        $slots = app(BuildVirtualCiteSlotsService::class)->handle(
+        if (in_array($property, ['from_date', 'until_date', 'service_id'])) {
+            $this->refreshSlots();
+        }
+    }
+
+    protected function refreshSlots(): void
+    {
+        $this->availableSlots = app(BuildVirtualCiteSlotsService::class)->handle(
             from: Carbon::parse($this->from_date ?: now()->toDateString()),
             until: Carbon::parse($this->until_date ?: now()->copy()->addDays(7)->toDateString()),
             serviceId: filled($this->service_id) ? (int) $this->service_id : null,
             roomId: null,
         );
-
-        return $slots instanceof Collection ? $slots : collect($slots);
     }
 
     public function getServicesProperty(): array

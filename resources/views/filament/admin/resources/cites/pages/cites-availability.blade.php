@@ -1,10 +1,7 @@
 <x-filament-panels::page>
     @php
-        $slots = $this->slots instanceof \Illuminate\Support\Collection
-            ? $this->slots
-            : collect($this->slots ?? []);
-
-        $slotsCount = $slots->count();
+        $availableSlots = collect($this->availableSlots ?? []);
+        $slotsCount = $availableSlots->count();
     @endphp
 
     <div class="space-y-6">
@@ -86,6 +83,7 @@
                 Huecos disponibles
             </x-slot>
 
+
             @if ($slotsCount > 0)
                 <div class="overflow-hidden rounded-xl border border-gray-200">
                     <div class="overflow-x-auto">
@@ -103,7 +101,7 @@
                             </thead>
 
                             <tbody class="divide-y divide-gray-100 bg-white">
-                                @foreach ($slots as $slot)
+                                @foreach ($availableSlots as $slot)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3">
                                             <div class="font-medium text-gray-900">
@@ -120,10 +118,8 @@
                                             </div>
                                         </td>
 
-                                        <td class="px-4 py-3">
-                                            <div class="text-sm text-gray-700">
-                                                {{ $slot['room_name'] ?: 'Sin sala' }}
-                                            </div>
+                                        <td class="px-4 py-3 text-sm text-gray-700">
+                                            {{ $slot['room_name'] ?: 'Sin sala' }}
                                         </td>
 
                                         <td class="px-4 py-3 text-center">
