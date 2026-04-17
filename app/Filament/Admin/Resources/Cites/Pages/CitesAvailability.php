@@ -14,6 +14,7 @@ use App\Models\Reservation;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Filament\Support\Enums\Width;
+use App\Services\Cites\CiteConflictService;
 
 class CitesAvailability extends Page
 {
@@ -22,7 +23,7 @@ class CitesAvailability extends Page
     protected static ?string $title = 'Disponibilidad';
 
     protected string $view = 'filament.admin.resources.cites.pages.cites-availability';
-    
+
     protected Width|string|null $maxContentWidth = Width::Full;
 
     public ?string $from_date = null;
@@ -84,9 +85,9 @@ class CitesAvailability extends Page
         ];
     }
 
-   public function openBookingModalByIndex(int $index): void
+   public function openBookingModal(string $slotKey): void
 {
-    $slot = $this->availableSlots[$index] ?? null;
+    $slot = collect($this->availableSlots)->firstWhere('key', $slotKey);
 
     if (! $slot) {
         return;
@@ -217,6 +218,34 @@ public function bookSelectedSlot(): void
                     'status' => 'confirmed',
                 ]);
             }
+
+            $conflict = app(CiteConflictService::class)->findBlockingConflict(
+    date: $slot['date'],
+    startTime: $slot['start_time'],
+    endTime: $slot['end_time'],
+    specialistId: (int) $slot['specialist_id'],
+    roomId: $slot['room_id'] ? (int) $slot['room_id'] : null,
+    ignoreCiteId: $cite?->id,
+);
+
+if ($conflict) {
+    $roomConflict = $slot['room_id'] && (int) $conflict->room_id === (int) $slot['room_id'];
+    $specialistConflict = $conflict->service && (int) $conflict->service->specialist_id === (int) $slot['specialist_id'];
+
+    if ($roomConflict && $specialistConflict) {
+        throw new \RuntimeException('No se puede reservar: la sala y el especialista ya están ocupados en ese horario.');
+    }
+
+    if ($roomConflict) {
+        throw new \RuntimeException('No se puede reservar: la sala ya está ocupada en ese horario.');
+    }
+
+    if ($specialistConflict) {
+        throw new \RuntimeException('No se puede reservar: el especialista ya está ocupado en ese horario.');
+    }
+
+    throw new \RuntimeException('No se puede reservar: existe un conflicto con otra cita en ese horario.');
+}
 
             $patientAlreadyBooked = $cite->reservations()
                 ->where('patient_id', $patientId)

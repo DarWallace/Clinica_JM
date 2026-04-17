@@ -1,8 +1,9 @@
 <x-filament-panels::page>
     @php
-        $availableSlots = collect($this->availableSlots ?? []);
-        $slotsCount = $availableSlots->count();
-        $availableCount = $availableSlots->where('is_available', true)->count();
+        $allSlots = collect($this->availableSlots ?? []);
+    $availableSlots = $allSlots->where('is_available', true); // IMPORTANTE: sin ->values()
+    $slotsCount = $availableSlots->count();
+    $availableCount = $slotsCount;
     @endphp
 
     <div class="space-y-6">
@@ -138,7 +139,7 @@
                                         <td style="padding: 18px 20px; border-bottom: 1px solid #f1f5f9; text-align: right;">
                                             @if ($slot['is_available'])
                                                 <x-filament::button
-                                                    wire:click="openBookingModalByIndex({{ $index }})"
+                                                    wire:click="openBookingModal('{{ $slot['key'] }}')"
                                                     color="success"
                                                     size="sm"
                                                     icon="heroicon-m-calendar-days"

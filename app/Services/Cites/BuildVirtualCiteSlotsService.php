@@ -7,6 +7,7 @@ use App\Models\Exception as ScheduleException;
 use App\Models\ScheduleRule;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use App\Services\Cites\CiteConflictService;
 
 class BuildVirtualCiteSlotsService
 {
@@ -26,9 +27,9 @@ class BuildVirtualCiteSlotsService
 
         $rules = ScheduleRule::query()
             ->with(['service', 'room'])
-            ->whereHas('service', fn ($query) => $query->where('active', true))
-            ->when($serviceId, fn ($query) => $query->where('service_id', $serviceId))
-            ->when($roomId, fn ($query) => $query->where('room_id', $roomId))
+            ->whereHas('service', fn($query) => $query->where('active', true))
+            ->when($serviceId, fn($query) => $query->where('service_id', $serviceId))
+            ->when($roomId, fn($query) => $query->where('room_id', $roomId))
             ->whereDate('valid_from', '<=', $until->toDateString())
             ->where(function ($query) use ($from) {
                 $query->whereNull('valid_until')
@@ -47,12 +48,12 @@ class BuildVirtualCiteSlotsService
 
         $existingCites = Cite::query()
             ->with([
-                'reservations' => fn ($query) => $query->where('status', 'confirmed'),
+                'reservations' => fn($query) => $query->where('status', 'confirmed'),
             ])
             ->whereDate('date', '>=', $from->toDateString())
             ->whereDate('date', '<=', $until->toDateString())
-            ->when($serviceId, fn ($query) => $query->where('service_id', $serviceId))
-            ->when($roomId, fn ($query) => $query->where('room_id', $roomId))
+            ->when($serviceId, fn($query) => $query->where('service_id', $serviceId))
+            ->when($roomId, fn($query) => $query->where('room_id', $roomId))
             ->get()
             ->keyBy(function (Cite $cite) {
                 $date = $cite->date instanceof Carbon
@@ -148,7 +149,16 @@ class BuildVirtualCiteSlotsService
                     $isCancelled = $cite?->status === 'cancelled';
                     $isCompleted = $cite?->status === 'completed';
 
-                    $isAvailable = ! $isCompleted && (
+                    $hasBlockingConflict = app(CiteConflictService::class)->hasBlockingConflict(
+                        date: $day->toDateString(),
+                        startTime: $slotStart->format('H:i:s'),
+                        endTime: $slotEnd->format('H:i:s'),
+                        specialistId: (int) $service->specialist_id,
+                        roomId: $rule->room_id ? (int) $rule->room_id : null,
+                        ignoreCiteId: $cite?->id,
+                    );
+
+                    $isAvailable = ! $hasBlockingConflict && ! $isCompleted && (
                         $isCancelled || $reservedCount < $capacity
                     );
 
@@ -157,6 +167,7 @@ class BuildVirtualCiteSlotsService
                         'cite_id' => $cite?->id,
                         'service_id' => (int) $service->id,
                         'service_name' => (string) $service->name,
+                        'specialist_id' => (int) $service->specialist_id,
                         'room_id' => $rule->room_id ? (int) $rule->room_id : null,
                         'room_name' => $rule->room?->name,
                         'date' => $day->toDateString(),
