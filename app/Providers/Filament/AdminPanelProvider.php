@@ -20,7 +20,6 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 
-
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -29,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -38,7 +38,6 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
-
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
@@ -54,7 +53,6 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-
             ->authMiddleware([
                 Authenticate::class,
             ])
@@ -65,29 +63,27 @@ class AdminPanelProvider extends PanelProvider
                     ->config([
                         'initialView' => 'timeGridWeek',
                         'locale' => 'es',
-                        'eventOverlap' => false,      // Evita visualmente que se encabalquen si son la misma sala
-                        'slotEventOverlap' => false,  // Los pone uno al lado del otro en lugar de encima
-                        'firstDay' => 1, // Lunes como primer día
-                        'hiddenDays' => [0, 6], // 0 = Domingo, 6 = Sábado. ¡Adiós al fin de semana!
+                        'eventOverlap' => false,
+                        'slotEventOverlap' => false,
+                        'firstDay' => 1,
+                        'hiddenDays' => [0, 6],
                         'slotMinTime' => '08:00:00',
                         'slotMaxTime' => '22:00:00',
                         'height' => 'auto',
-                        // ESTO ES LO QUE BUSCAS:
                         'slotLabelFormat' => [
                             'hour' => 'numeric',
                             'minute' => '2-digit',
-                            'omitZeroMinute' => false, // Obliga a mostrar el :00
+                            'omitZeroMinute' => false,
                             'meridiem' => false,
-                            'hour12' => false, // Formato 24h
+                            'hour12' => false,
                         ],
-                        // También para el formato de hora dentro de los eventos (las barritas)
                         'eventTimeFormat' => [
                             'hour' => 'numeric',
                             'minute' => '2-digit',
                             'meridiem' => false,
                             'hour12' => false,
                         ],
-                    ])
+                    ]),
             ]);
     }
 }

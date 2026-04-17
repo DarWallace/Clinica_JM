@@ -1,534 +1,253 @@
 <x-filament-panels::page>
     @php
-     $availableSlots = collect($this->availableSlots ?? []);
-    $slotsCount = $availableSlots->count();
-    $availableCount = $availableSlots->where('is_available', true)->count();
+        $availableSlots = collect($this->availableSlots ?? []);
+        $slotsCount = $availableSlots->count();
+        $availableCount = $availableSlots->where('is_available', true)->count();
     @endphp
 
     <div class="space-y-6">
-        <x-filament::section>
-            <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:18px;">
-                <div style="
-            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-            border: 1px solid #dbeafe;
-            border-radius: 18px;
-            padding: 20px;
-            box-shadow: 0 8px 20px rgba(30, 64, 175, 0.06);
-        ">
-                    <div style="font-size:13px; font-weight:600; color:#2563eb; text-transform:uppercase; letter-spacing:.04em;">
-                        Huecos encontrados
-                    </div>
-                    <div style="margin-top:10px; font-size:34px; font-weight:800; color:#111827; line-height:1;">
-                        {{ $availableCount  }}
-                    </div>
-                    <div style="margin-top:10px; font-size:13px; color:#6b7280;">
-                        Disponibilidad calculada en tiempo real según reglas, reservas y excepciones.
-                    </div>
+        {{-- Cabecera de Estadísticas con Degradados --}}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #dbeafe; border-radius: 18px; padding: 24px; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.1);">
+                <div style="font-size: 12px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: .05em;">
+                    Huecos Libres
                 </div>
-
-                <div style="
-            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
-            border: 1px solid #e5e7eb;
-            border-radius: 18px;
-            padding: 20px;
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-        ">
-                    <div style="font-size:13px; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:.04em;">
-                        Rango consultado
-                    </div>
-                    <div style="margin-top:10px; font-size:22px; font-weight:700; color:#111827; line-height:1.2;">
-                        {{ \Carbon\Carbon::parse($this->from_date)->format('d/m/Y') }}
-                        <span style="color:#9ca3af; font-weight:500;">—</span>
-                        {{ \Carbon\Carbon::parse($this->until_date)->format('d/m/Y') }}
-                    </div>
-                    <div style="margin-top:10px; font-size:13px; color:#6b7280;">
-                        Se muestran únicamente los huecos que encajan dentro de este periodo.
-                    </div>
+                <div style="margin-top: 12px; font-size: 40px; font-weight: 800; color: #111827; line-height: 1;">
+                    {{ $availableCount }}
                 </div>
-
-                <div style="
-            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-            border: 1px solid #bbf7d0;
-            border-radius: 18px;
-            padding: 20px;
-            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.05);
-        ">
-                    <div style="font-size:13px; font-weight:600; color:#15803d; text-transform:uppercase; letter-spacing:.04em;">
-                        Filtro activo
-                    </div>
-
-                    <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;">
-                        <x-filament::badge color="success">
-                            Servicio:
-                            {{ $this->service_id ? ($this->services[$this->service_id] ?? 'Seleccionado') : 'Todos' }}
-                        </x-filament::badge>
-                    </div>
-
-                    <div style="margin-top:10px; font-size:13px; color:#6b7280;">
-                        La sala se determina automáticamente según el tratamiento y su regla de horario.
-                    </div>
+                <div style="margin-top: 12px; font-size: 13px; color: #64748b; line-height: 1.5;">
+                    Disponibilidad calculada en tiempo real.
                 </div>
             </div>
-        </x-filament::section>
 
+            <div style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);">
+                <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .05em;">
+                    Periodo de Consulta
+                </div>
+                <div style="margin-top: 12px; font-size: 20px; font-weight: 700; color: #1e293b; line-height: 1.2;">
+                    {{ \Carbon\Carbon::parse($this->from_date)->format('d/m/Y') }}
+                    <span style="color: #cbd5e1; margin: 0 4px;">—</span>
+                    {{ \Carbon\Carbon::parse($this->until_date)->format('d/m/Y') }}
+                </div>
+                <div style="margin-top: 12px; font-size: 13px; color: #64748b;">
+                    Solo se muestran huecos en este rango.
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1px solid #bbf7d0; border-radius: 18px; padding: 24px; box-shadow: 0 10px 25px rgba(22, 163, 74, 0.05);">
+                <div style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: .05em;">
+                    Tratamiento Seleccionado
+                </div>
+                <div style="margin-top: 12px;">
+                    <x-filament::badge color="success" size="lg">
+                        {{ $this->service_id ? ($this->services[$this->service_id] ?? 'Seleccionado') : 'Todos los servicios' }}
+                    </x-filament::badge>
+                </div>
+                <div style="margin-top: 12px; font-size: 13px; color: #64748b;">
+                    La sala se asigna según la regla de horario.
+                </div>
+            </div>
+        </div>
+
+        {{-- Formulario de Búsqueda --}}
         <x-filament::section>
             <x-slot name="heading">
-                Buscar disponibilidad
+                <span style="font-weight: 800; letter-spacing: -0.02em;">Panel de Búsqueda Avanzada</span>
             </x-slot>
 
-            <div style="
-        border: 1px solid #e5e7eb;
-        border-radius: 18px;
-        background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-        padding: 22px;
-    ">
-                <div style="margin-bottom:18px;">
-                    <div style="font-size:16px; font-weight:700; color:#111827;">
-                        Selección de fecha y tratamiento
-                    </div>
-
-                </div>
-
-                <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:18px;">
+            <div style="background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%); border: 1px solid #e5e7eb; border-radius: 20px; padding: 24px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                     <div>
-                        <label style="display:block; margin-bottom:8px; font-size:13px; font-weight:700; color:#374151;">
-                            Desde
-                        </label>
-                        <div style="
-                    border:1px solid #d1d5db;
-                    border-radius:14px;
-                    background:white;
-                    padding:10px 12px;
-                    box-shadow: inset 0 1px 2px rgba(0,0,0,.03);
-                ">
-                            <input
-                                type="date"
-                                wire:model.live="from_date"
-                                style="
-                            width:100%;
-                            border:0;
-                            outline:none;
-                            background:transparent;
-                            font-size:14px;
-                            color:#111827;
-                        ">
-                        </div>
+                        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #374151;">Fecha Inicial</label>
+                        <x-filament::input.wrapper>
+                            <x-filament::input type="date" wire:model.live="from_date" />
+                        </x-filament::input.wrapper>
                     </div>
 
                     <div>
-                        <label style="display:block; margin-bottom:8px; font-size:13px; font-weight:700; color:#374151;">
-                            Hasta
-                        </label>
-                        <div style="
-                    border:1px solid #d1d5db;
-                    border-radius:14px;
-                    background:white;
-                    padding:10px 12px;
-                    box-shadow: inset 0 1px 2px rgba(0,0,0,.03);
-                ">
-                            <input
-                                type="date"
-                                wire:model.live="until_date"
-                                style="
-                            width:100%;
-                            border:0;
-                            outline:none;
-                            background:transparent;
-                            font-size:14px;
-                            color:#111827;
-                        ">
-                        </div>
+                        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #374151;">Fecha Final</label>
+                        <x-filament::input.wrapper>
+                            <x-filament::input type="date" wire:model.live="until_date" />
+                        </x-filament::input.wrapper>
                     </div>
 
                     <div>
-                        <label style="display:block; margin-bottom:8px; font-size:13px; font-weight:700; color:#374151;">
-                            Tratamiento
-                        </label>
-                        <div style="
-                    border:1px solid #d1d5db;
-                    border-radius:14px;
-                    background:white;
-                    padding:10px 12px;
-                    box-shadow: inset 0 1px 2px rgba(0,0,0,.03);
-                ">
-                            <select
-                                wire:model.live="service_id"
-                                style="
-                            width:100%;
-                            border:0;
-                            outline:none;
-                            background:transparent;
-                            font-size:14px;
-                            color:#111827;
-                        ">
-                                <option value="">Todos</option>
+                        <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #374151;">Tratamiento</label>
+                        <x-filament::input.wrapper>
+                            <x-filament::input.select wire:model.live="service_id">
+                                <option value="">Todos los tratamientos</option>
                                 @foreach ($this->services as $id => $label)
-                                <option value="{{ $id }}">{{ $label }}</option>
+                                    <option value="{{ $id }}">{{ $label }}</option>
                                 @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="
-            margin-top:18px;
-            display:flex;
-            flex-wrap:wrap;
-            gap:10px;
-            align-items:center;
-            justify-content:space-between;
-        ">
-
-
-                    <div style="font-size:12px; color:#6b7280;">
-                        Los resultados se actualizan automáticamente al cambiar los filtros.
+                            </x-filament::input.select>
+                        </x-filament::input.wrapper>
                     </div>
                 </div>
             </div>
         </x-filament::section>
 
+        {{-- Tabla de Resultados Estilizada --}}
         <x-filament::section>
             <x-slot name="heading">
-                Huecos disponibles
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span style="font-weight: 800; letter-spacing: -0.02em;">Listado de Huecos</span>
+
+                    <div style="font-size: 13px; color: #374151; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 4px 14px; font-weight: 600;">
+                        {{ $slotsCount }} huecos encontrados
+                    </div>
+                </div>
             </x-slot>
-
-
             @if ($slotsCount > 0)
-            <div style="
-        border: 1px solid #e5e7eb;
-        border-radius: 18px;
-        overflow: hidden;
-        background: white;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-    ">
-                <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:16px 20px;
-            border-bottom:1px solid #e5e7eb;
-            background:#fafafa;
-        ">
-                    <div>
-                        <div style="font-size:16px; font-weight:700; color:#111827;">Citas</div>
-
-                    </div>
-
-                    <div style="
-                font-size:13px;
-                color:#374151;
-                background:#f3f4f6;
-                border:1px solid #e5e7eb;
-                border-radius:999px;
-                padding:8px 12px;
-                white-space:nowrap;
-            ">
-                        {{ $slotsCount }} huecos
+                <div style="border: 1px solid #e5e7eb; border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 15px 35px rgba(0,0,0,0.05);">
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                            <thead>
+                                <tr style="background: #f8fafc;">
+                                    <th style="padding: 16px 20px; text-align: left; font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #f1f5f9;">FECHA Y HORA</th>
+                                    <th style="padding: 16px 20px; text-align: left; font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #f1f5f9;">TRATAMIENTO / SALA</th>
+                                    <th style="padding: 16px 20px; text-align: center; font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #f1f5f9;">TIPO / OCUPACIÓN</th>
+                                    <th style="padding: 16px 20px; text-align: center; font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #f1f5f9;">ESTADO</th>
+                                    <th style="padding: 16px 20px; text-align: right; border-bottom: 2px solid #f1f5f9;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($availableSlots as $index => $slot)
+                                    <tr style="transition: all 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
+                                        <td style="padding: 18px 20px; border-bottom: 1px solid #f1f5f9;">
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 15px;">{{ \Carbon\Carbon::parse($slot['date'])->format('d/m/Y') }}</div>
+                                            <div style="font-size: 13px; color: #64748b; margin-top: 2px;">{{ substr($slot['start_time'], 0, 5) }} - {{ substr($slot['end_time'], 0, 5) }}</div>
+                                        </td>
+                                        <td style="padding: 18px 20px; border-bottom: 1px solid #f1f5f9;">
+                                            <div style="font-weight: 600; color: #334155;">{{ $slot['service_name'] }}</div>
+                                            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Sala: {{ $slot['room_name'] ?: 'No asignada' }}</div>
+                                        </td>
+                                        <td style="padding: 18px 20px; border-bottom: 1px solid #f1f5f9; text-align: center;">
+                                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+                                                <x-filament::badge color="gray" size="sm">{{ $slot['type'] === 'group' ? 'Grupal' : 'Individual' }}</x-filament::badge>
+                                                <span style="font-size: 11px; font-weight: 600; color: #64748b;">{{ $slot['occupancy_label'] }}</span>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 18px 20px; border-bottom: 1px solid #f1f5f9; text-align: center;">
+                                            @if ($slot['is_available'])
+                                                <x-filament::badge color="success" icon="heroicon-m-check-circle">Disponible</x-filament::badge>
+                                            @else
+                                                <x-filament::badge color="danger" icon="heroicon-m-x-circle">Completo</x-filament::badge>
+                                            @endif
+                                        </td>
+                                        <td style="padding: 18px 20px; border-bottom: 1px solid #f1f5f9; text-align: right;">
+                                            @if ($slot['is_available'])
+                                                <x-filament::button
+                                                    wire:click="openBookingModalByIndex({{ $index }})"
+                                                    color="success"
+                                                    size="sm"
+                                                    icon="heroicon-m-calendar-days"
+                                                    style="border-radius: 10px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);"
+                                                >
+                                                    Reservar
+                                                </x-filament::button>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
-                <div style="overflow-x:auto;">
-                    <table style="
-                width:100%;
-                min-width:1200px;
-                border-collapse:separate;
-                border-spacing:0;
-                font-size:14px;
-            ">
-                        <thead>
-                            <tr style="background:#f9fafb;">
-                                <th style="padding:14px 18px; text-align:left; font-weight:700; color:#374151; border-bottom:1px solid #e5e7eb; width:180px;">
-                                    Fecha / hora
-                                </th>
-                                <th style="padding:14px 18px; text-align:left; font-weight:700; color:#374151; border-bottom:1px solid #e5e7eb; width:260px;">
-                                    Tratamiento
-                                </th>
-                                <th style="padding:14px 18px; text-align:left; font-weight:700; color:#374151; border-bottom:1px solid #e5e7eb; width:180px;">
-                                    Sala
-                                </th>
-                                <th style="padding:14px 18px; text-align:center; font-weight:700; color:#374151; border-bottom:1px solid #e5e7eb; width:120px;">
-                                    Tipo
-                                </th>
-                                <th style="padding:14px 18px; text-align:center; font-weight:700; color:#374151; border-bottom:1px solid #e5e7eb; width:130px;">
-                                    Ocupación
-                                </th>
-                                <th style="padding:14px 18px; text-align:left; font-weight:700; color:#374151; border-bottom:1px solid #e5e7eb; width:140px;">
-                                    Estado
-                                </th>
-                                <th style="padding:14px 18px; text-align:right; font-weight:700; color:#374151; border-bottom:1px solid #e5e7eb; width:140px;">
-                                    Acción
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach ($availableSlots as $index => $slot)
-                            <tr style="background:white;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background='white'">
-                                <td style="padding:16px 18px; border-bottom:1px solid #f3f4f6; vertical-align:top;">
-                                    <div style="font-weight:700; color:#111827;">
-                                        {{ \Carbon\Carbon::parse($slot['date'])->format('d/m/Y') }}
-                                    </div>
-                                    <div style="margin-top:4px; font-size:12px; color:#6b7280;">
-                                        {{ substr($slot['start_time'], 0, 5) }} - {{ substr($slot['end_time'], 0, 5) }}
-                                    </div>
-                                </td>
-
-                                <td style="padding:16px 18px; border-bottom:1px solid #f3f4f6; vertical-align:top;">
-                                    <div style="font-weight:700; color:#111827;">
-                                        {{ $slot['service_name'] }}
-                                    </div>
-
-                                </td>
-
-                                <td style="padding:16px 18px; border-bottom:1px solid #f3f4f6; vertical-align:top; color:#374151;">
-                                    {{ $slot['room_name'] ?: 'Sin sala' }}
-                                </td>
-
-                                <td style="padding:16px 18px; border-bottom:1px solid #f3f4f6; text-align:center; vertical-align:top;">
-                                    @if ($slot['type'] === 'group')
-                                    <x-filament::badge color="info">Grupal</x-filament::badge>
-                                    @else
-                                    <x-filament::badge color="gray">Individual</x-filament::badge>
-                                    @endif
-                                </td>
-
-                                <td style="padding:16px 18px; border-bottom:1px solid #f3f4f6; text-align:center; vertical-align:top;">
-                                    <x-filament::badge color="gray">
-                                        {{ $slot['occupancy_label'] }}
-                                    </x-filament::badge>
-                                </td>
-
-                                <td style="padding:16px 18px; border-bottom:1px solid #f3f4f6; vertical-align:top;">
-                                    @if ($slot['is_available'])
-                                    <x-filament::badge color="success">Disponible</x-filament::badge>
-                                    @else
-                                    <x-filament::badge color="danger">Completa</x-filament::badge>
-                                    @endif
-                                </td>
-
-                                <td style="padding:16px 18px; border-bottom:1px solid #f3f4f6; text-align:right; vertical-align:top;">
-                                    @if ($slot['is_available'])
-                                    <x-filament::button
-                                        type="button"
-                                        size="sm"
-                                        color="success"
-                                        wire:click="openBookingModalByIndex({{ $index }})">
-                                        Reservar
-                                    </x-filament::button>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
             @else
-            <div class="py-12 text-center">
-                <div class="mx-auto max-w-2xl">
-                    <h3 class="text-base font-semibold text-gray-900">No se encontraron huecos</h3>
-                    <p class="mt-2 text-sm text-gray-500">
-                        Revisa las reglas de horario, el rango de fechas, el tratamiento y las excepciones.
-                    </p>
-
-                    <div class="mt-6 space-y-2 text-sm text-gray-600">
-                        <p>
-                            <strong>Rango:</strong>
-                            {{ \Carbon\Carbon::parse($this->from_date)->format('d/m/Y') }}
-                            -
-                            {{ \Carbon\Carbon::parse($this->until_date)->format('d/m/Y') }}
-                        </p>
-                        <p>
-                            <strong>Servicio:</strong>
-                            {{ $this->service_id ? ($this->services[$this->service_id] ?? 'Seleccionado') : 'Todos' }}
-                        </p>
-                        <p>
-                            <strong>Huecos encontrados:</strong> {{ $slotsCount }}
-                        </p>
-                    </div>
+                {{-- Empty State con diseño --}}
+                <div style="text-align: center; padding: 60px 20px; background: #f9fafb; border-radius: 20px; border: 2px dashed #e2e8f0;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                    <h3 style="font-size: 18px; font-weight: 700; color: #1e293b;">No hay huecos disponibles</h3>
+                    <p style="color: #64748b; max-width: 400px; margin: 8px auto;">Intenta ampliar el rango de fechas o seleccionar otro tratamiento.</p>
                 </div>
-            </div>
             @endif
         </x-filament::section>
     </div>
 
-
-
-
+    {{-- Modal de Reserva Estilizado --}}
     @if ($showBookingModal && $selectedSlot)
-    <div style="
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        background: rgba(0,0,0,0.45);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    ">
-        <div style="
-            width: 100%;
-            max-width: 800px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-            overflow: hidden;
-        ">
-            <div style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 20px 24px;
-                border-bottom: 1px solid #e5e7eb;
-            ">
-                <div>
-                    <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #111827;">
-                        Reservar cita
-                    </h3>
-                    <p style="margin: 6px 0 0; font-size: 14px; color: #6b7280;">
-                        Busca y selecciona el paciente para este hueco.
-                    </p>
-                </div>
+    <div style="position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div style="width: 100%; max-width: 600px; background: white; border-radius: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.3); overflow: hidden; animation: modalIn 0.3s ease-out;">
 
-                <button
-                    type="button"
-                    wire:click="closeBookingModal"
-                    style="
-                        border: 0;
-                        background: transparent;
-                        font-size: 14px;
-                        color: #6b7280;
-                        cursor: pointer;
-                    ">
-                    Cerrar
+            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start; background: linear-gradient(to right, #ffffff, #f8fafc);">
+                <div>
+                    <h3 style="font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.02em;">Nueva Reserva</h3>
+                    <p style="font-size: 14px; color: #64748b; margin-top: 4px;">Completa los datos del paciente para confirmar.</p>
+                </div>
+                <button wire:click="closeBookingModal" style="color: #94a3b8; border: 0; background: transparent; cursor: pointer; padding: 4px;">
+                    <x-heroicon-o-x-mark class="w-6 h-6" />
                 </button>
             </div>
 
-            <div style="padding: 24px; display: grid; gap: 20px;">
-                <div style="
-                    border: 1px solid #e5e7eb;
-                    background: #f9fafb;
-                    border-radius: 12px;
-                    padding: 16px;
-                    font-size: 14px;
-                    color: #374151;
-                ">
-                    <div><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($selectedSlot['date'])->format('d/m/Y') }}</div>
-                    <div><strong>Hora:</strong> {{ substr($selectedSlot['start_time'], 0, 5) }} - {{ substr($selectedSlot['end_time'], 0, 5) }}</div>
-                    <div><strong>Tratamiento:</strong> {{ $selectedSlot['service_name'] }}</div>
-                    <div><strong>Sala:</strong> {{ $selectedSlot['room_name'] ?: 'Sin sala' }}</div>
-                    <div><strong>Ocupación:</strong> {{ $selectedSlot['occupancy_label'] }}</div>
+            <div style="padding: 30px; display: grid; gap: 24px;">
+                {{-- Resumen del Slot --}}
+                <div style="background: #f1f5f9; border-radius: 16px; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+                    <div><span style="display:block; color:#64748b; font-weight:600; margin-bottom:2px;">FECHA</span> <span style="font-weight:700; color:#1e293b;">{{ \Carbon\Carbon::parse($selectedSlot['date'])->format('d/m/Y') }}</span></div>
+                    <div><span style="display:block; color:#64748b; font-weight:600; margin-bottom:2px;">HORARIO</span> <span style="font-weight:700; color:#1e293b;">{{ substr($selectedSlot['start_time'], 0, 5) }} - {{ substr($selectedSlot['end_time'], 0, 5) }}</span></div>
+                    <div style="grid-column: span 2;"><span style="display:block; color:#64748b; font-weight:600; margin-bottom:2px;">TRATAMIENTO</span> <span style="font-weight:700; color:#1e293b;">{{ $selectedSlot['service_name'] }}</span></div>
                 </div>
 
+                {{-- Buscador --}}
                 <div>
-                    <label style="display:block; margin-bottom:8px; font-size:14px; font-weight:600; color:#374151;">
-                        Buscar paciente
-                    </label>
-
-                    <input
-                        type="text"
-                        wire:model.live.debounce.300ms="patientSearch"
-                        placeholder="Escribe nombre, apellidos, email o teléfono..."
-                        style="
-                            width: 100%;
-                            border: 1px solid #d1d5db;
-                            border-radius: 10px;
-                            padding: 12px 14px;
-                            font-size: 14px;
-                        ">
+                    <label style="display: block; margin-bottom: 10px; font-size: 14px; font-weight: 700; color: #334155;">Buscar Paciente</label>
+                    <x-filament::input.wrapper icon="heroicon-m-magnifying-glass">
+                        <x-filament::input
+                            type="text"
+                            wire:model.live.debounce.300ms="patientSearch"
+                            placeholder="Nombre, DNI o teléfono..."
+                        />
+                    </x-filament::input.wrapper>
                 </div>
 
-                @if ($selectedPatientId && $selectedPatientLabel)
-                <div style="
-                        border: 1px solid #bbf7d0;
-                        background: #f0fdf4;
-                        color: #166534;
-                        border-radius: 10px;
-                        padding: 12px 14px;
-                        font-size: 14px;
-                    ">
-                    <strong>Paciente seleccionado:</strong> {{ $selectedPatientLabel }}
-                </div>
+                {{-- Resultados de búsqueda --}}
+                @if (!empty($patientResults))
+                    <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px;">
+                        @foreach ($patientResults as $patient)
+                            <button wire:click="selectPatient({{ $patient['id'] }}, @js($patient['label']))"
+                                style="width:100%; text-align:left; padding:12px 16px; border-bottom:1px solid #f1f5f9; background:white; cursor:pointer;"
+                                onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                                <div style="font-weight:700; color:#1e293b;">{{ $patient['label'] }}</div>
+                                <div style="font-size:12px; color:#64748b;">{{ $patient['email'] }} · {{ $patient['phone'] }}</div>
+                            </button>
+                        @endforeach
+                    </div>
                 @endif
 
-                @if (! empty($patientResults))
-                <div style="
-                        max-height: 260px;
-                        overflow-y: auto;
-                        border: 1px solid #e5e7eb;
-                        border-radius: 12px;
-                    ">
-                    @foreach ($patientResults as $patient)
-                    <button
-                        type="button"
-                        wire:click="selectPatient({{ $patient['id'] }}, @js($patient['label']))"
-                        style="
-                                    width: 100%;
-                                    text-align: left;
-                                    background: white;
-                                    border: 0;
-                                    border-bottom: 1px solid #f3f4f6;
-                                    padding: 14px 16px;
-                                    cursor: pointer;
-                                ">
-                        <div style="font-weight: 600; color: #111827;">
-                            {{ $patient['label'] }}
+                {{-- Paciente Seleccionado --}}
+                @if ($selectedPatientId)
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px; border-radius: 12px; display: flex; align-items: center; gap: 12px;">
+                        <div style="color: #16a34a;"><x-heroicon-s-check-circle class="w-6 h-6" /></div>
+                        <div>
+                            <div style="font-size:12px; color:#166534; font-weight:700;">PACIENTE SELECCIONADO</div>
+                            <div style="font-weight:700; color:#064e3b;">{{ $selectedPatientLabel }}</div>
                         </div>
-                        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
-                            {{ $patient['email'] ?: 'Sin email' }}
-                            @if($patient['phone'])
-                            · {{ $patient['phone'] }}
-                            @endif
-                        </div>
-                    </button>
-                    @endforeach
-                </div>
-                @elseif(strlen(trim($patientSearch)) >= 2)
-                <div style="
-                        border: 1px solid #e5e7eb;
-                        background: #f9fafb;
-                        color: #6b7280;
-                        border-radius: 10px;
-                        padding: 12px 14px;
-                        font-size: 14px;
-                    ">
-                    No se han encontrado pacientes con esa búsqueda.
-                </div>
+                    </div>
                 @endif
 
-                <div style="display:flex; justify-content:flex-end; gap:12px;">
-                    <button
-                        type="button"
-                        wire:click="closeBookingModal"
-                        style="
-                            border: 1px solid #d1d5db;
-                            background: white;
-                            color: #374151;
-                            border-radius: 10px;
-                            padding: 10px 16px;
-                            font-size: 14px;
-                            cursor: pointer;
-                        ">
+                {{-- Botonera --}}
+                <div style="display: flex; gap: 12px; margin-top: 10px;">
+                    <x-filament::button color="gray" wire:click="closeBookingModal" style="flex: 1; border-radius: 12px;">
                         Cancelar
-                    </button>
-
-                    <button
-                        type="button"
+                    </x-filament::button>
+                    <x-filament::button
+                        color="success"
                         wire:click="bookSelectedSlot"
-                        style="
-                            border: 0;
-                            background: #16a34a;
-                            color: white;
-                            border-radius: 10px;
-                            padding: 10px 16px;
-                            font-size: 14px;
-                            cursor: pointer;
-                        ">
-                        Confirmar reserva
-                    </button>
+                        style="flex: 2; border-radius: 12px; box-shadow: 0 10px 20px rgba(22, 163, 74, 0.2);"
+                        :disabled="!$selectedPatientId"
+                    >
+                        Confirmar Reserva Ahora
+                    </x-filament::button>
                 </div>
             </div>
         </div>
     </div>
     @endif
+
+    <style>
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+    </style>
 </x-filament-panels::page>
