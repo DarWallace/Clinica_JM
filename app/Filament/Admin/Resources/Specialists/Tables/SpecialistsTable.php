@@ -50,7 +50,9 @@ class SpecialistsTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]),
+                    ])
+                    ->label('Borrar seleccionados') // <-- Cambia el texto del botón principal
+            ->icon('heroicon-o-trash'),
             ]);
     }
 }

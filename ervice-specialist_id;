@@ -1,0 +1,15 @@
+[90m= [39m[34;4mApp\Models\Service[39;24m {#7589
+    [34mid[39m: [35m3[39m,
+    [34mspecialist_id[39m: [35m5[39m,
+    [34mname[39m: "[32mNeurofisioterapia[39m",
+    [34mdescription[39m: "[32mMejora motor del sistema nervioso[39m",
+    [34mduration[39m: [35m60[39m,
+    [34mbuffer_minutes[39m: [35m0[39m,
+    [34mprice[39m: "[32m60.00[39m",
+    [34mtype[39m: "[32mindividual[39m",
+    [34mmax_patients[39m: [35m1[39m,
+    [34mactive[39m: [35m1[39m,
+    [34mcreated_at[39m: "[32m2026-04-14 10:00:36[39m",
+    [34mupdated_at[39m: "[32m2026-04-17 08:50:41[39m",
+  }
+

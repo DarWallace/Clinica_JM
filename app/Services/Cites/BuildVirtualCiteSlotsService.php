@@ -26,7 +26,7 @@ class BuildVirtualCiteSlotsService
             : Carbon::parse($until)->endOfDay();
 
         $rules = ScheduleRule::query()
-            ->with(['service', 'room'])
+            ->with(['service.specialist.user', 'room'])
             ->whereHas('service', fn($query) => $query->where('active', true))
             ->when($serviceId, fn($query) => $query->where('service_id', $serviceId))
             ->when($roomId, fn($query) => $query->where('room_id', $roomId))
@@ -163,23 +163,25 @@ class BuildVirtualCiteSlotsService
                     );
 
                     $slots[] = [
-                        'key' => $key,
-                        'cite_id' => $cite?->id,
-                        'service_id' => (int) $service->id,
-                        'service_name' => (string) $service->name,
-                        'specialist_id' => (int) $service->specialist_id,
-                        'room_id' => $rule->room_id ? (int) $rule->room_id : null,
-                        'room_name' => $rule->room?->name,
-                        'date' => $day->toDateString(),
-                        'start_time' => $slotStart->format('H:i:s'),
-                        'end_time' => $slotEnd->format('H:i:s'),
-                        'type' => (string) $service->type,
-                        'capacity' => $capacity,
-                        'reserved_count' => $reservedCount,
-                        'occupancy_label' => $reservedCount . '/' . $capacity,
-                        'is_available' => $isAvailable,
-                        'status_label' => $isAvailable ? 'Disponible' : 'Completa',
-                    ];
+    'key' => $key,
+    'cite_id' => $cite?->id,
+    'service_id' => (int) $service->id,
+    'service_name' => (string) $service->name,
+    'specialist_id' => (int) $service->specialist_id,
+    'specialist_name' => trim(
+        ($service->specialist?->user?->name ?? '') . ' ' . ($service->specialist?->user?->surname ?? '')
+    ) ?: 'Sin especialista',
+    'room_id' => $rule->room_id ? (int) $rule->room_id : null,
+    'room_name' => $rule->room?->name,
+    'date' => $day->toDateString(),
+    'start_time' => $slotStart->format('H:i:s'),
+    'end_time' => $slotEnd->format('H:i:s'),
+    'type' => (string) $service->type,
+    'capacity' => $capacity,
+    'reserved_count' => $reservedCount,
+    'occupancy_label' => $reservedCount . '/' . $capacity,
+    'is_available' => $isAvailable,
+];
 
                     $slotStart->addMinutes($stepMinutes);
                 }
@@ -200,16 +202,22 @@ class BuildVirtualCiteSlotsService
     }
 
     protected function isBlockedByException(
-        int $specialistId,
-        Carbon $startAt,
-        Carbon $endAt,
-    ): bool {
-        return ScheduleException::query()
-            ->where('specialist_id', $specialistId)
-            ->where('start_datetime', '<', $endAt)
-            ->where('end_datetime', '>', $startAt)
-            ->exists();
-    }
+     int $specialistId,
+    Carbon $startAt,
+    Carbon $endAt,
+): bool {
+    return ScheduleException::query()
+        ->where('start_datetime', '<', $endAt)
+        ->where('end_datetime', '>', $startAt)
+        ->where(function ($query) use ($specialistId) {
+            $query->where('applies_to_all', true)
+                ->orWhere('specialist_id', $specialistId)
+                ->orWhereHas('specialists', function ($subQuery) use ($specialistId) {
+                    $subQuery->where('users.id', $specialistId);
+                });
+        })
+        ->exists();
+}
 
     protected function makeKey(
         int $serviceId,
