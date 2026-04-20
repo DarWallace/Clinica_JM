@@ -20,4 +20,10 @@ class EditScheduleRule extends EditRecord
 {
     return $this->getResource()::getUrl('index');
 }
+protected function mutateFormDataBeforeSave(array $data): array
+{
+    unset($data['day_of_week']);
+
+    return $data;
+}
 }

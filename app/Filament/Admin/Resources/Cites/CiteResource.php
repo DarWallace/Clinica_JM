@@ -24,7 +24,8 @@ class CiteResource extends Resource
 
     protected static ?string $navigationLabel = 'Citas';
 
-    protected static ?string $recordTitleAttribute = 'name';
+    //protected static ?string $recordTitleAttribute = 'id';
+
 
     public static function form(Schema $schema): Schema
     {

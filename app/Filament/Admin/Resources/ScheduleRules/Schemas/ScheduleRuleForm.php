@@ -45,14 +45,33 @@ class ScheduleRuleForm
                                 CheckboxList::make('day_of_week')
                                     ->label('Días de la Semana')
                                     ->options([
-                                        1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles',
-                                        4 => 'Jueves', 5 => 'Viernes',
+                                        1 => 'Lunes',
+                                        2 => 'Martes',
+                                        3 => 'Miércoles',
+                                        4 => 'Jueves',
+                                        5 => 'Viernes',
                                     ])
 
                                     ->columns(2)
                                     ->required()
-                                    ->extraAttributes(['class' => 'bg-gray-50/50 p-4 rounded-xl border border-gray-100'])
-                                    ->formatStateUsing(fn ($state) => filled($state) ? [(string) $state] : []),
+                                    ->extraAttributes(['class' => 'mt-2 bg-gray-50/50 p-4 rounded-xl border border-gray-100'])
+                                    ->formatStateUsing(function ($state): array {
+                                        if (blank($state)) {
+                                            return [];
+                                        }
+
+                                        if (is_array($state)) {
+                                            return array_map('strval', $state);
+                                        }
+
+                                        return [(string) $state];
+                                    })
+                                    ->disabledOn('edit')
+                                    ->dehydrated(fn(?string $operation): bool => $operation !== 'edit')
+                                    ->helperText(fn(?string $operation): ?string => $operation === 'edit'
+                                        ? 'El día no se puede modificar al editar una regla existente. Si necesitas cambiarlo o añadir más días, crea una nueva regla.'
+                                        : null)
+                                    ->required(),
 
                                 // Selección de horas con validación v5
                                 Grid::make(1)

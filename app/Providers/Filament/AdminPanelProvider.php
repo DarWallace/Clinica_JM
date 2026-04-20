@@ -29,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->globalSearch(false)// elimina el buscador superior que me da errores
             ->colors([
                 'primary' => Color::Amber,
             ])
