@@ -25,7 +25,7 @@ class CiteConflictService
             ->where(function ($query) {
                 $query
                     ->where('status', 'completed')
-                    ->orWhereHas('reservations', fn ($reservationQuery) => $reservationQuery->where('status', 'confirmed'));
+                    ->orWhereHas('reservations', fn ($reservationQuery) => $reservationQuery->whereIn('status', ['pending', 'confirmed']));
             })
             ->where(function ($query) use ($roomId, $specialistId) {
                 if ($roomId) {

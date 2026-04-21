@@ -186,7 +186,7 @@ class AgendaWidget extends FullCalendarWidget
             )
             ->get()
             ->map(function (Cite $cite): array {
-                $confirmedReservations = $cite->reservations->where('status', 'confirmed');
+                $confirmedReservations = $cite->reservations->whereIn('status', ['pending', 'confirmed']);
                 $service = $cite->service;
                 $isGroup = $service?->type === 'group';
                 $capacity = $isGroup ? max(1, (int) ($service?->max_patients ?: 1)) : 1;
@@ -374,7 +374,7 @@ class AgendaWidget extends FullCalendarWidget
 
                 $cite->load([
                     'service',
-                    'reservations' => fn ($query) => $query->where('status', 'confirmed'),
+                    'reservations' => fn ($query) => $query->whereIn('status', ['pending', 'confirmed']),
                 ]);
 
                 $alreadyExists = $cite->reservations
@@ -436,7 +436,7 @@ class AgendaWidget extends FullCalendarWidget
     protected function getConfirmedReservationsCount(Cite $cite): int
     {
         return $cite->reservations
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['pending', 'confirmed'])
             ->count();
     }
 
@@ -444,7 +444,7 @@ class AgendaWidget extends FullCalendarWidget
     {
         $cite->loadMissing([
             'service',
-            'reservations' => fn ($query) => $query->where('status', 'confirmed'),
+            'reservations' => fn ($query) => $query->whereIn('status', ['pending', 'confirmed']),
         ]);
 
         return $cite->reservations->count() < $this->getCiteCapacity($cite);
@@ -458,7 +458,7 @@ class AgendaWidget extends FullCalendarWidget
             'reservations.patient.user',
         ]);
 
-        $confirmedReservations = $cite->reservations->where('status', 'confirmed');
+        $confirmedReservations = $cite->reservations->whereIn('status', ['pending', 'confirmed']);
 
         if ($confirmedReservations->isEmpty()) {
             return new HtmlString('<div style="color:#64748b;">No hay pacientes asignados todavía.</div>');
@@ -514,7 +514,7 @@ class AgendaWidget extends FullCalendarWidget
                 Placeholder::make('status')
                     ->label('Estado')
                     ->content(function (Cite $record): string {
-                        $count = $record->reservations->where('status', 'confirmed')->count();
+                        $count = $record->reservations->whereIn('status', ['pending', 'confirmed'])->count();
                         $capacity = $this->getCiteCapacity($record);
 
                         if (($record->service?->type ?? 'individual') === 'group') {
@@ -561,7 +561,7 @@ class AgendaWidget extends FullCalendarWidget
                     ->lockForUpdate()
                     ->with([
                         'service',
-                        'reservations' => fn ($query) => $query->where('status', 'confirmed'),
+                        'reservations' => fn ($query) => $query->whereIn('status', ['pending', 'confirmed']),
                     ])
                     ->findOrFail($citeId);
 

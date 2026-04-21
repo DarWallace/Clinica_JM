@@ -85,208 +85,211 @@ class CitesAvailability extends Page
         ];
     }
 
-   public function openBookingModal(string $slotKey): void
-{
-    $slot = collect($this->availableSlots)->firstWhere('key', $slotKey);
+    public function openBookingModal(string $slotKey): void
+    {
+        $slot = collect($this->availableSlots)->firstWhere('key', $slotKey);
 
-    if (! $slot) {
-        return;
-    }
+        if (! $slot) {
+            return;
+        }
 
-    if (! ($slot['is_available'] ?? false)) {
-        return;
-    }
+        if (! ($slot['is_available'] ?? false)) {
+            return;
+        }
 
-    $this->selectedSlot = $slot;
-    $this->showBookingModal = true;
+        $this->selectedSlot = $slot;
+        $this->showBookingModal = true;
 
-    $this->patientSearch = '';
-    $this->selectedPatientId = null;
-    $this->selectedPatientLabel = null;
-    $this->patientResults = [];
-}
-
-public function closeBookingModal(): void
-{
-    $this->showBookingModal = false;
-    $this->selectedSlot = null;
-    $this->patientSearch = '';
-    $this->selectedPatientId = null;
-    $this->selectedPatientLabel = null;
-    $this->patientResults = [];
-}
-
-public function updatedPatientSearch(): void
-{
-    $search = trim($this->patientSearch);
-
-    if (mb_strlen($search) < 2) {
+        $this->patientSearch = '';
+        $this->selectedPatientId = null;
+        $this->selectedPatientLabel = null;
         $this->patientResults = [];
-        return;
     }
 
-    $this->patientResults = Patient::query()
-        ->join('users', 'patients.user_id', '=', 'users.id')
-        ->where(function ($query) use ($search) {
-            $query
-                ->where('users.name', 'like', "%{$search}%")
-                ->orWhere('users.surname', 'like', "%{$search}%")
-                ->orWhereRaw("CONCAT(users.name, ' ', COALESCE(users.surname, '')) like ?", ["%{$search}%"])
-                ->orWhere('users.email', 'like', "%{$search}%")
-                ->orWhere('users.phone', 'like', "%{$search}%");
-        })
-        ->orderBy('users.name')
-        ->limit(10)
-        ->get([
-            'patients.user_id as id',
-            DB::raw("CONCAT(users.name, ' ', COALESCE(users.surname, '')) as label"),
-            'users.email',
-            'users.phone',
-        ])
-        ->map(fn ($row) => [
-            'id' => (int) $row->id,
-            'label' => $row->label,
-            'email' => $row->email,
-            'phone' => $row->phone,
-        ])
-        ->toArray();
-}
-
-public function selectPatient(int $patientId, string $label): void
-{
-    $this->selectedPatientId = $patientId;
-    $this->selectedPatientLabel = $label;
-    $this->patientSearch = $label;
-    $this->patientResults = [];
-}
-
-public function bookSelectedSlot(): void
-{
-    if (! $this->selectedSlot) {
-        Notification::make()
-            ->title('No hay hueco seleccionado')
-            ->danger()
-            ->send();
-
-        return;
+    public function closeBookingModal(): void
+    {
+        $this->showBookingModal = false;
+        $this->selectedSlot = null;
+        $this->patientSearch = '';
+        $this->selectedPatientId = null;
+        $this->selectedPatientLabel = null;
+        $this->patientResults = [];
     }
 
-    if (! $this->selectedPatientId) {
-        Notification::make()
-            ->title('Selecciona un paciente')
-            ->danger()
-            ->send();
+    public function updatedPatientSearch(): void
+    {
+        $search = trim($this->patientSearch);
 
-        return;
+        if (mb_strlen($search) < 2) {
+            $this->patientResults = [];
+            return;
+        }
+
+        $this->patientResults = Patient::query()
+            ->join('users', 'patients.user_id', '=', 'users.id')
+            ->where(function ($query) use ($search) {
+                $query
+                    ->where('users.name', 'like', "%{$search}%")
+                    ->orWhere('users.surname', 'like', "%{$search}%")
+                    ->orWhereRaw("CONCAT(users.name, ' ', COALESCE(users.surname, '')) like ?", ["%{$search}%"])
+                    ->orWhere('users.email', 'like', "%{$search}%")
+                    ->orWhere('users.phone', 'like', "%{$search}%");
+            })
+            ->orderBy('users.name')
+            ->limit(10)
+            ->get([
+                'patients.user_id as id',
+                DB::raw("CONCAT(users.name, ' ', COALESCE(users.surname, '')) as label"),
+                'users.email',
+                'users.phone',
+            ])
+            ->map(fn($row) => [
+                'id' => (int) $row->id,
+                'label' => $row->label,
+                'email' => $row->email,
+                'phone' => $row->phone,
+            ])
+            ->toArray();
     }
 
-    try {
-        DB::transaction(function () {
-            $slot = $this->selectedSlot;
-            $patientId = $this->selectedPatientId;
-            $capacity = max(1, (int) ($slot['capacity'] ?? 1));
+    public function selectPatient(int $patientId, string $label): void
+    {
+        $this->selectedPatientId = $patientId;
+        $this->selectedPatientLabel = $label;
+        $this->patientSearch = $label;
+        $this->patientResults = [];
+    }
 
-            $citeQuery = Cite::query()
-                ->where('service_id', $slot['service_id'])
-                ->whereDate('date', $slot['date'])
-                ->whereTime('start_time', $slot['start_time'])
-                ->whereTime('end_time', $slot['end_time']);
+    public function bookSelectedSlot(): void
+    {
+        if (! $this->selectedSlot) {
+            Notification::make()
+                ->title('No hay hueco seleccionado')
+                ->danger()
+                ->send();
 
-            if (! empty($slot['room_id'])) {
-                $citeQuery->where('room_id', $slot['room_id']);
-            } else {
-                $citeQuery->whereNull('room_id');
-            }
+            return;
+        }
 
-            $cite = $citeQuery->lockForUpdate()->first();
+        if (! $this->selectedPatientId) {
+            Notification::make()
+                ->title('Selecciona un paciente')
+                ->danger()
+                ->send();
 
-            if ($cite && $cite->status === 'completed') {
-                throw new \RuntimeException('La cita ya está completada.');
-            }
+            return;
+        }
 
-            if (! $cite) {
-                $cite = Cite::create([
-                    'service_id' => $slot['service_id'],
-                    'room_id' => $slot['room_id'],
-                    'date' => $slot['date'],
-                    'start_time' => $slot['start_time'],
-                    'end_time' => $slot['end_time'],
-                    'status' => 'confirmed',
+        try {
+            DB::transaction(function () {
+                $slot = $this->selectedSlot;
+                $patientId = $this->selectedPatientId;
+                $capacity = max(1, (int) ($slot['capacity'] ?? 1));
+
+                $citeQuery = Cite::query()
+                    ->where('service_id', $slot['service_id'])
+                    ->whereDate('date', $slot['date'])
+                    ->whereTime('start_time', $slot['start_time'])
+                    ->whereTime('end_time', $slot['end_time']);
+
+                if (! empty($slot['room_id'])) {
+                    $citeQuery->where('room_id', $slot['room_id']);
+                } else {
+                    $citeQuery->whereNull('room_id');
+                }
+
+                $cite = $citeQuery->lockForUpdate()->first();
+
+                if ($cite && $cite->status === 'completed') {
+                    throw new \RuntimeException('La cita ya está completada.');
+                }
+
+                if (! $cite) {
+                    $cite = Cite::create([
+                        'service_id' => $slot['service_id'],
+                        'room_id' => $slot['room_id'],
+                        'date' => $slot['date'],
+                        'start_time' => $slot['start_time'],
+                        'end_time' => $slot['end_time'],
+                        'status' => 'active',
+                    ]);
+                } elseif ($cite->status === 'cancelled') {
+                    $cite->update([
+                        'status' => 'active',
+                    ]);
+                }
+
+                $conflict = app(CiteConflictService::class)->findBlockingConflict(
+                    date: $slot['date'],
+                    startTime: $slot['start_time'],
+                    endTime: $slot['end_time'],
+                    specialistId: (int) $slot['specialist_id'],
+                    roomId: $slot['room_id'] ? (int) $slot['room_id'] : null,
+                    ignoreCiteId: $cite?->id,
+                );
+
+                if ($conflict) {
+                    $roomConflict = $slot['room_id'] && (int) $conflict->room_id === (int) $slot['room_id'];
+                    $specialistConflict = $conflict->service && (int) $conflict->service->specialist_id === (int) $slot['specialist_id'];
+
+                    if ($roomConflict && $specialistConflict) {
+                        throw new \RuntimeException('No se puede reservar: la sala y el especialista ya están ocupados en ese horario.');
+                    }
+
+                    if ($roomConflict) {
+                        throw new \RuntimeException('No se puede reservar: la sala ya está ocupada en ese horario.');
+                    }
+
+                    if ($specialistConflict) {
+                        throw new \RuntimeException('No se puede reservar: el especialista ya está ocupado en ese horario.');
+                    }
+
+                    throw new \RuntimeException('No se puede reservar: existe un conflicto con otra cita en ese horario.');
+                }
+
+                $patientAlreadyBooked = $cite->reservations()
+                    ->where('patient_id', $patientId)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->exists();
+
+                if ($patientAlreadyBooked) {
+                    throw new \RuntimeException('Ese paciente ya está asignado a este hueco.');
+                }
+
+                $activeReservations = $cite->reservations()
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->count();
+
+                if ($activeReservations >= $capacity) {
+                    throw new \RuntimeException('Ese hueco ya no tiene plazas disponibles.');
+                }
+
+                Reservation::create([
+                    'cite_id' => $cite->id,
+                    'patient_id' => $patientId,
+                    'status' => 'pending',
+                    'payment_status' => 'pending',
                 ]);
-            } elseif ($cite->status === 'cancelled') {
                 $cite->update([
-                    'status' => 'confirmed',
+                    'status' => 'active',
                 ]);
-            }
+            });
+        } catch (\Throwable $exception) {
+            Notification::make()
+                ->title('No se ha podido reservar la cita')
+                ->body($exception->getMessage())
+                ->danger()
+                ->send();
 
-            $conflict = app(CiteConflictService::class)->findBlockingConflict(
-    date: $slot['date'],
-    startTime: $slot['start_time'],
-    endTime: $slot['end_time'],
-    specialistId: (int) $slot['specialist_id'],
-    roomId: $slot['room_id'] ? (int) $slot['room_id'] : null,
-    ignoreCiteId: $cite?->id,
-);
+            return;
+        }
 
-if ($conflict) {
-    $roomConflict = $slot['room_id'] && (int) $conflict->room_id === (int) $slot['room_id'];
-    $specialistConflict = $conflict->service && (int) $conflict->service->specialist_id === (int) $slot['specialist_id'];
+        $this->closeBookingModal();
+        $this->refreshSlots();
 
-    if ($roomConflict && $specialistConflict) {
-        throw new \RuntimeException('No se puede reservar: la sala y el especialista ya están ocupados en ese horario.');
-    }
-
-    if ($roomConflict) {
-        throw new \RuntimeException('No se puede reservar: la sala ya está ocupada en ese horario.');
-    }
-
-    if ($specialistConflict) {
-        throw new \RuntimeException('No se puede reservar: el especialista ya está ocupado en ese horario.');
-    }
-
-    throw new \RuntimeException('No se puede reservar: existe un conflicto con otra cita en ese horario.');
-}
-
-            $patientAlreadyBooked = $cite->reservations()
-                ->where('patient_id', $patientId)
-                ->where('status', 'confirmed')
-                ->exists();
-
-            if ($patientAlreadyBooked) {
-                throw new \RuntimeException('Ese paciente ya está asignado a este hueco.');
-            }
-
-            $activeReservations = $cite->reservations()
-                ->where('status', 'confirmed')
-                ->count();
-
-            if ($activeReservations >= $capacity) {
-                throw new \RuntimeException('Ese hueco ya no tiene plazas disponibles.');
-            }
-
-            Reservation::create([
-                'cite_id' => $cite->id,
-                'patient_id' => $patientId,
-                'status' => 'confirmed',
-                'payment_status' => 'pending',
-            ]);
-        });
-    } catch (\Throwable $exception) {
         Notification::make()
-            ->title('No se ha podido reservar la cita')
-            ->body($exception->getMessage())
-            ->danger()
+            ->title('Cita reservada correctamente')
+            ->success()
             ->send();
-
-        return;
     }
-
-    $this->closeBookingModal();
-    $this->refreshSlots();
-
-    Notification::make()
-        ->title('Cita reservada correctamente')
-        ->success()
-        ->send();
-}
 }

@@ -44,8 +44,7 @@ class CiteForm
                         Select::make('status')
                             ->label('Estado de la Cita')
                             ->options([
-                                'available' => 'Disponible',
-                                'confirmed' => 'Reservada/Confirmada',
+                                'active' => 'Activa',
                                 'cancelled' => 'Cancelada',
                                 'completed' => 'Completada',
                             ])

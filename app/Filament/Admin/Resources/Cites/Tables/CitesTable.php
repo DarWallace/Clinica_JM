@@ -40,9 +40,8 @@ class CitesTable
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'available' => 'success',
-                        'confirmed' => 'primary',
+                    ->color(fn(?string $state): string => match ($state) {
+                        'active' => 'primary',
                         'cancelled' => 'danger',
                         'completed' => 'warning',
                         default => 'gray',
@@ -58,7 +57,7 @@ class CitesTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['date'] ?? null,
-                            fn (Builder $query, $date): Builder => $query->whereDate('date', $date),
+                            fn(Builder $query, $date): Builder => $query->whereDate('date', $date),
                         );
                     })
                     ->indicateUsing(function (array $data): ?string {
@@ -72,10 +71,11 @@ class CitesTable
 
                 SelectFilter::make('status')
                     ->options([
-                        'available' => 'Solo libres',
-                        'confirmed' => 'Solo reservadas',
+                        'active' => 'Activas',
+                        'cancelled' => 'Canceladas',
+                        'completed' => 'Completadas',
                     ]),
-                    SelectFilter::make('service')
+                SelectFilter::make('service')
                     ->label('Servicio')
                     ->relationship('service', 'name')
                     ->searchable()
@@ -83,7 +83,7 @@ class CitesTable
 
             ])
             ->filtersTriggerAction(
-                fn (Action $action) => $action
+                fn(Action $action) => $action
                     ->button()
                     ->label('Filtrar Citas')
                     ->icon('heroicon-m-funnel')
@@ -96,9 +96,9 @@ class CitesTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    ])
+                ])
                     ->label('Borrar seleccionados') // <-- Cambia el texto del botón principal
-            ->icon('heroicon-o-trash'),
+                    ->icon('heroicon-o-trash'),
             ]);
     }
 }

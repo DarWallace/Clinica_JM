@@ -48,7 +48,7 @@ class BuildVirtualCiteSlotsService
 
         $existingCites = Cite::query()
             ->with([
-                'reservations' => fn($query) => $query->where('status', 'confirmed'),
+                'reservations' => fn($query) => $query->whereIn('status', ['pending', 'confirmed']),
             ])
             ->whereDate('date', '>=', $from->toDateString())
             ->whereDate('date', '<=', $until->toDateString())
